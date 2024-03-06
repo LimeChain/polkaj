@@ -1,5 +1,6 @@
 package io.emeraldpay.polkaj.schnorrkel
 
+import io.emeraldpay.polkaj.merlin.TranscriptData
 import org.apache.commons.codec.binary.Hex
 import spock.lang.Specification
 
@@ -170,4 +171,46 @@ class SchnorrkelNativeSpec extends Specification {
         then:
         Hex.encodeHexString(act.getPublicKey()) == "40b9675df90efa6069ff623b0fdfcf706cd47ca7452a5056c7ad58194d23440a"
     }
+
+    def "Test VRF sign and verify"() {
+        setup:
+        def signTranscript = new TranscriptData("vrf-test".getBytes())
+        def verifyTranscript = new TranscriptData("vrf-test".getBytes())
+
+        def keyPair = schnorrkel.generateKeyPair()
+
+        def vrfOutputAndProof = schnorrkel.vrfSign(keyPair, signTranscript)
+
+        when:
+        boolean verified = schnorrkel.vrfVerify(keyPair, verifyTranscript, vrfOutputAndProof);
+
+        then:
+        verified
+    }
+
+    // translated from https://github.com/ChainSafe/go-schnorrkel/blob/master/vrf_test.go#L172
+    def "Test VRF verify from Rust"() {
+        setup:
+        byte[] pubKeyBytes = new byte[]{-64, 42, 72, -70, 20, 11, 83, -106, -11, 69, -88, -34, 22, -90, -89, 95, 125, -8, -72, 67, -59, 10, -95, 107, -51, 116, -113, -92, -113, 127, -90, 84};
+        Schnorrkel.PublicKey pubKey = new Schnorrkel.PublicKey(pubKeyBytes)
+
+        TranscriptData transcript = new TranscriptData("SigningContext".getBytes())
+        transcript.appendMessage("", "yo!")
+        transcript.appendMessage("sign-bytes", "meow")
+
+        byte[] outputBytes = new byte[] {0, 91, 50, 25, -42, 94, 119, 36, 71, -40, 33, -104, 85, -72, 34, 120, 61, -95, -92, -33, 76, 53, 40, -10, 76, 38, -21, -52, 43, 31, -77, 28}
+
+        byte[] cbytes = new byte[] {120, 23, -21, -97, 115, 122, -49, -50, 123, -24, 75, -13, 115, -1, -125, -75, -37, -15, -56, -50, 21, 22, -18, 16, 68, 49, 86, 99, 76, -117, 39, 0}
+        byte[] sbytes = new byte[] {102, 106, -75, -120, 97, -115, -69, 1, -22, -73, -15, 28, 27, -27, -123, 8, 32, -10, -11, -50, -57, -114, -122, 124, -30, -39, 95, 30, -80, -10, 5, 3}
+        byte[] proofBytes = new byte[cbytes.length + sbytes.length]
+        System.arraycopy(cbytes, 0, proofBytes, 0, cbytes.length)
+        System.arraycopy(sbytes, 0, proofBytes, cbytes.length, sbytes.length)
+
+        when:
+        boolean verified = schnorrkel.vrfVerify(pubKey, transcript, VrfOutputAndProof.wrap(outputBytes, proofBytes))
+
+        then:
+        verified
+    }
+
 }
