@@ -213,4 +213,29 @@ class SchnorrkelNativeSpec extends Specification {
         verified
     }
 
+    // NOTE: This test is currently only a sanity check against trivially false positives
+    def "Test VRF verify invalid proof fails"() {
+        setup:
+        def transcript = new TranscriptData("vrf-test".getBytes())
+        // Ideally, we'd want this test case to corroborate that "choosing any other than the right scalar would invalidate the proof",
+        // i.e. we'd only want to change one of the scalars in the proof.
+        // But since we don't have that granularity on our Java side, for now,
+        // I've hardcoded this "fake proof", generated from another secret key and another scalar picked at random.
+        def invalidProof = new byte[]{117, 87, 1, 77, 44, 43, -13, 116, 47, 125, -44, 124, 47, -113, 46, -126, -76, 68, 46, -11, 42, 64, 7, 43, -121, 107, -18, 123, 19, 66, 115, 7, 107, -104, 95, 62, 4, -100, 111, -23, 79, 56, 108, 113, -127, -85, -38, -35, -33, -97, -43, 85, 52, 106, 71, -53, 11, 81, 96, 35, -80, -119, -14, 1}
+
+        def keyPair = schnorrkel.generateKeyPair();
+        def vrfOutputAndProof = schnorrkel.vrfSign(keyPair, transcript)
+
+        when:
+        def verifiedValidProof = schnorrkel.vrfVerify(keyPair, transcript, vrfOutputAndProof)
+
+        then:
+        verifiedValidProof
+
+        when:
+        def verifiedInvalidProof = schnorrkel.vrfVerify(keyPair, transcript, VrfOutputAndProof.wrap(vrfOutputAndProof.getOutput(), invalidProof))
+
+        then:
+        !verifiedInvalidProof
+    }
 }
