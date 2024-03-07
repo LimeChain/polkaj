@@ -4,8 +4,8 @@ package io.emeraldpay.polkaj.schnorrkel;
  * Essentially a record to hold the VRF output together with its proof.
  */
 public class VrfOutputAndProof {
-    public static int OUTPUT_BYTE_LEN = 32;
-    public static int PROOF_BYTE_LEN = 64;
+    public static final int OUTPUT_BYTE_LEN = 32;
+    public static final int PROOF_BYTE_LEN = 64;
 
     private final byte[] output;
 
