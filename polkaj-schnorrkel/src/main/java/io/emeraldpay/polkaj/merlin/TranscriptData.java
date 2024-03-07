@@ -3,6 +3,7 @@ package io.emeraldpay.polkaj.merlin;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A container class to simply hold all the necessary input data (label + messages) to construct the actual
@@ -42,18 +43,32 @@ public class TranscriptData {
      * @param label the message label
      * @param x the u64 to append
      */
+    // TODO:
+    //  Maybe just remove this method and leave it up to the user...
+    //  We can't guarantee good enough type safety and obeying the representational contract is left to the developer,
+    //  which could lead to issues.
     public void appendAsU64(byte[] label, BigInteger x) {
-        final int U64_BYTE_LEN = 8;
-        appendMessage(label, bytesToFixedLength(x.toByteArray(), U64_BYTE_LEN));
+        appendMessage(label, encodeBigIntAsU64LittleEndian(x));
     }
 
-    private static byte[] bytesToFixedLength(byte[] byteArray, int length) {
+    private static byte[] encodeBigIntAsU64LittleEndian(BigInteger x) {
+        final int length = 8;
+        byte[] byteArray = x.toByteArray();
         byte[] littleEndian = new byte[length];
 
-        for (int i = 0; i < length; i++) {
+        final int upperBound = Math.min(length, byteArray.length);
+        for (int i = 0; i < upperBound; i++) {
             littleEndian[i] = byteArray[byteArray.length - 1 - i];
         }
 
         return littleEndian;
+    }
+
+    public static void main(String[] args) {
+        long x = 0x1023456789ab00efL;
+        BigInteger y = BigInteger.valueOf(x);
+
+        System.out.println(Arrays.toString(y.toByteArray()));
+        System.out.println(Arrays.toString(encodeBigIntAsU64LittleEndian(y)));
     }
 }
