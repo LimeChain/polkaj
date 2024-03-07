@@ -3,7 +3,6 @@ package io.emeraldpay.polkaj.merlin;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A container class to simply hold all the necessary input data (label + messages) to construct the actual
@@ -62,13 +61,5 @@ public class TranscriptData {
         }
 
         return littleEndian;
-    }
-
-    public static void main(String[] args) {
-        long x = 0x1023456789ab00efL;
-        BigInteger y = BigInteger.valueOf(x);
-
-        System.out.println(Arrays.toString(y.toByteArray()));
-        System.out.println(Arrays.toString(encodeBigIntAsU64LittleEndian(y)));
     }
 }
