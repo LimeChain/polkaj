@@ -16,9 +16,10 @@ pub mod jni {
       #[instance]
       raw: AutoLocal<'env, 'borrow>,
 
-      //TODO:
-      //  Figure out how to make this simply a `Box<[u8]>` instead of a `Vec<Box<[u8]>>`,
-      //  currently a blocker with byte[] fields (seems to be an issue with robusta itself, some missing impls?)
+      // HACK:
+      //  Figure out how to make this simply a `Box<[u8]>` instead of a `Vec<Box<[u8]>>`.
+      //  Currently, this is a blocker with byte[] fields; seems to be an issue with robusta itself, perhaps some missing impls...
+      //  see: https://github.com/giovanniberti/robusta/issues/69
       #[field]
       pub domainSeparationLabel: Field<'env, 'borrow, Vec<Box<[u8]>>>,
 
@@ -30,22 +31,27 @@ pub mod jni {
   }
 }
 
-// TODO:
-//  Try to avoid having to `Box::leak`,
-//  In theory, should be safe enough if used correctly Java-side, since "we know Java owns the object"
+
 impl <'env, 'borrow> From<TranscriptData<'env, 'borrow>> for merlin::Transcript {
+  // SAFETY:
+  //  Since merlin's API requires labels to have a static lifetime, a `Box::leak` invocation is necessary.
+  //  This is safe enough, however, since the boxed values are managed by the Java runtime and will be GC'd there when needed,
+  //  so Rust doesn't have to worry about that (although it wants to).
   fn from(value: TranscriptData) -> Self {
-    let mut transcript = merlin::Transcript::new(Box::leak(
+    // SAFETY: We're purposefully dropping mutability since we want to read only
+    let domain_separation_label: &[u8] = Box::leak(
       value.domainSeparationLabel.get().unwrap()
       .first()
       .cloned()
       .unwrap()
-    ));
+    );
 
-    let labels = value.labels.get().unwrap();
+    let mut transcript = merlin::Transcript::new(domain_separation_label);
+
+    let message_labels = value.labels.get().unwrap();
     let messages = value.messages.get().unwrap();
 
-    for (label, message) in labels.iter().cloned().zip(messages.iter().cloned()) {
+    for (label, message) in message_labels.iter().cloned().zip(messages.iter().cloned()) {
       transcript.append_message(Box::leak(label), message.as_ref())
     }
 
