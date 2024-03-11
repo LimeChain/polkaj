@@ -11,4 +11,4 @@ jni = "0.21.1"
 schnorrkel = "0.11.4"
 hex = "0.4.2"
 rand = "0.8.5"
-merlin = { version = "3.0", default-features = false }
+merlin = "3.0"
