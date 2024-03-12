@@ -172,6 +172,7 @@ class SchnorrkelNativeSpec extends Specification {
         Hex.encodeHexString(act.getPublicKey()) == "40b9675df90efa6069ff623b0fdfcf706cd47ca7452a5056c7ad58194d23440a"
     }
 
+    // taken from https://github.com/ChainSafe/go-schnorrkel/blob/d1354d86e41dc066cdf6c755a9d08caffc55b542/vrf_test.go#L90
     def "Test VRF sign and verify"() {
         setup:
         def signTranscript = new TranscriptData("vrf-test".getBytes())
@@ -188,7 +189,7 @@ class SchnorrkelNativeSpec extends Specification {
         verified
     }
 
-    // translated from https://github.com/ChainSafe/go-schnorrkel/blob/master/vrf_test.go#L172
+    // translated from https://github.com/ChainSafe/go-schnorrkel/blob/d1354d86e41dc066cdf6c755a9d08caffc55b542/vrf_test.go#L172
     def "Test VRF verify from Rust"() {
         setup:
         byte[] pubKeyBytes = new byte[]{-64, 42, 72, -70, 20, 11, 83, -106, -11, 69, -88, -34, 22, -90, -89, 95, 125, -8, -72, 67, -59, 10, -95, 107, -51, 116, -113, -92, -113, 127, -90, 84};
@@ -214,6 +215,7 @@ class SchnorrkelNativeSpec extends Specification {
     }
 
     // NOTE: This test is currently only a sanity check against trivially false positives
+    // translated from https://github.com/ChainSafe/go-schnorrkel/blob/d1354d86e41dc066cdf6c755a9d08caffc55b542/vrf_test.go#L149
     def "Test VRF verify invalid proof fails"() {
         setup:
         def transcript = new TranscriptData("vrf-test".getBytes())
