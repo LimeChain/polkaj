@@ -34,7 +34,7 @@ class SchnorrkelNativeSpec extends Specification {
                         Hex.decodeHex(
                                 "28b0"
                         )
-                ));
+                ))
         then:
         def t = thrown(SchnorrkelException)
         t.message.length() > 0
@@ -48,7 +48,7 @@ class SchnorrkelNativeSpec extends Specification {
         byte[] signature = schnorrkel.sign(msg, key1)
         def act = schnorrkel.verify(signature, msg, key1)
         then:
-        act == true
+        act
     }
 
     def "Modified signature is invalid"() {
@@ -58,24 +58,23 @@ class SchnorrkelNativeSpec extends Specification {
         byte[] signature = schnorrkel.sign(msg, key1)
         def initial = schnorrkel.verify(signature, msg, key1)
         then:
-        initial == true
+        initial
 
         when:
         signature[0] = (byte)(signature[0] + 1)
         def act = schnorrkel.verify(signature, msg, key1)
         then:
-        act == false
+        !act
     }
 
     def "Different signature is invalid"() {
         setup:
         byte[] msg = "hello".bytes
         when:
-        byte[] signature = schnorrkel.sign(msg, key1)
         byte[] signature2 = schnorrkel.sign("hello2".bytes, key1)
         def act = schnorrkel.verify(signature2, msg, key1)
         then:
-        act == false
+        !act
     }
 
     def "Throws error on invalid signature"() {
@@ -183,7 +182,7 @@ class SchnorrkelNativeSpec extends Specification {
         def vrfOutputAndProof = schnorrkel.vrfSign(keyPair, signTranscript)
 
         when:
-        boolean verified = schnorrkel.vrfVerify(keyPair, verifyTranscript, vrfOutputAndProof);
+        boolean verified = schnorrkel.vrfVerify(keyPair, verifyTranscript, vrfOutputAndProof)
 
         then:
         verified
@@ -192,7 +191,7 @@ class SchnorrkelNativeSpec extends Specification {
     // translated from https://github.com/ChainSafe/go-schnorrkel/blob/d1354d86e41dc066cdf6c755a9d08caffc55b542/vrf_test.go#L172
     def "Test VRF verify from Rust"() {
         setup:
-        byte[] pubKeyBytes = new byte[]{-64, 42, 72, -70, 20, 11, 83, -106, -11, 69, -88, -34, 22, -90, -89, 95, 125, -8, -72, 67, -59, 10, -95, 107, -51, 116, -113, -92, -113, 127, -90, 84};
+        byte[] pubKeyBytes = new byte[]{-64, 42, 72, -70, 20, 11, 83, -106, -11, 69, -88, -34, 22, -90, -89, 95, 125, -8, -72, 67, -59, 10, -95, 107, -51, 116, -113, -92, -113, 127, -90, 84}
         Schnorrkel.PublicKey pubKey = new Schnorrkel.PublicKey(pubKeyBytes)
 
         TranscriptData transcript = new TranscriptData("SigningContext".getBytes())
@@ -225,7 +224,7 @@ class SchnorrkelNativeSpec extends Specification {
         // I've hardcoded this "fake proof", generated from another secret key and another scalar picked at random.
         def invalidProof = new byte[]{117, 87, 1, 77, 44, 43, -13, 116, 47, 125, -44, 124, 47, -113, 46, -126, -76, 68, 46, -11, 42, 64, 7, 43, -121, 107, -18, 123, 19, 66, 115, 7, 107, -104, 95, 62, 4, -100, 111, -23, 79, 56, 108, 113, -127, -85, -38, -35, -33, -97, -43, 85, 52, 106, 71, -53, 11, 81, 96, 35, -80, -119, -14, 1}
 
-        def keyPair = schnorrkel.generateKeyPair();
+        def keyPair = schnorrkel.generateKeyPair()
         def vrfOutputAndProof = schnorrkel.vrfSign(keyPair, transcript)
 
         when:
