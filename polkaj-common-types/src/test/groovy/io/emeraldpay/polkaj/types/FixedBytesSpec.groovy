@@ -17,6 +17,4 @@ class FixedBytesSpec extends Specification {
         def t = thrown(IllegalStateException)
         t.message.contains("Different size")
     }
-
-
 }

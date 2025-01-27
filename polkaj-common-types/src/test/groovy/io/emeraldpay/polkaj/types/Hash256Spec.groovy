@@ -189,4 +189,24 @@ class Hash256Spec extends Specification {
         then:
         hash1.hashCode() != hash2.hashCode()
     }
+
+    def "Deserialization produces expected Hash256"() {
+        setup:
+        def hash = Hash256.from("0x63c2499de640b43c924bc2bfc9ea89730e7c4790e24d126906e7af6c99cb506b")
+        def serialized = SerializationUtil.serialize(hash)
+        when:
+        def deserialized = SerializationUtil.deserialize(serialized)
+        then:
+        deserialized instanceof Hash256
+        deserialized.toString() == "0x63c2499de640b43c924bc2bfc9ea89730e7c4790e24d126906e7af6c99cb506b"
+    }
+
+    def "Cannot deserialize invalid length bytes"() {
+        setup:
+        def serialized = new byte[]{1, 2, 3, 4}
+        when:
+        SerializationUtil.deserialize(serialized)
+        then:
+        thrown(IllegalArgumentException)
+    }
 }
