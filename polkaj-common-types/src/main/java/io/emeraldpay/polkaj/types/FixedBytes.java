@@ -4,6 +4,13 @@ import java.util.Arrays;
 
 abstract public class FixedBytes extends ByteData {
 
+    /**
+     * Needed for serialization/deserialization.
+     */
+    public FixedBytes() {
+        super(new byte[0]);
+    }
+
     protected FixedBytes(byte[] value, int expectedSize) {
         super(value);
         if (value.length != expectedSize) {
@@ -34,7 +41,7 @@ abstract public class FixedBytes extends ByteData {
         }
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = Integer.valueOf(hex.substring(i, i+2), 16).byteValue();
+            data[i / 2] = Integer.valueOf(hex.substring(i, i + 2), 16).byteValue();
         }
         return data;
     }
