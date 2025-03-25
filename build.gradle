@@ -19,7 +19,7 @@ apply plugin: 'jacoco'
 
 allprojects {
     group = 'io.emeraldpay.polkaj'
-    version = "0.5.4-SNAPSHOT"
+    version = "0.5.5-SNAPSHOT"
 
     repositories {
         mavenLocal()
