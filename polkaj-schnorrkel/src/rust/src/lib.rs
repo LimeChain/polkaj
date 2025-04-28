@@ -18,7 +18,9 @@ use robusta_jni::jni::JNIEnv;
 use schnorrkel::context::SigningTranscript;
 use schnorrkel::derive::{ChainCode, Derivation, CHAIN_CODE_LENGTH};
 use schnorrkel::vrf::{VRFInOut, VRFPreOut, VRFProof, VRFProofBatchable, VRFSigningTranscript};
-use schnorrkel::{ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, Signature, SignatureError};
+use schnorrkel::{
+    ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, Signature, SignatureError,
+};
 use std::string::String;
 
 use merlin_jni::TranscriptData;
@@ -62,7 +64,7 @@ fn verify(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, Strin
     }
 }
 
-fn verifyDeprecated(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, String> {
+fn verify_deprecated(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, String> {
     let result = PublicKey::from_bytes(public)
         .map_err(|e| e.to_string())?
         .verify_simple_preaudit_deprecated(SIGNING_CTX, message, signature)
@@ -197,15 +199,16 @@ pub extern "system" fn Java_io_emeraldpay_polkaj_schnorrkel_SchnorrkelNative_ver
         .convert_byte_array(signature)
         .expect("Signature is not provided");
 
-    let output = match verifyDeprecated(signature.as_slice(), message.as_slice(), pubkey.as_slice()) {
-        Ok(valid) => valid as jboolean,
-        Err(msg) => {
-            let none = false as jboolean;
-            env.throw_new("io/emeraldpay/polkaj/schnorrkel/SchnorrkelException", msg)
-                .unwrap();
-            none
-        }
-    };
+    let output =
+        match verify_deprecated(signature.as_slice(), message.as_slice(), pubkey.as_slice()) {
+            Ok(valid) => valid as jboolean,
+            Err(msg) => {
+                let none = false as jboolean;
+                env.throw_new("io/emeraldpay/polkaj/schnorrkel/SchnorrkelException", msg)
+                    .unwrap();
+                none
+            }
+        };
     output
 }
 
