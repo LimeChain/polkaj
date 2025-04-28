@@ -18,7 +18,7 @@ use robusta_jni::jni::JNIEnv;
 use schnorrkel::context::SigningTranscript;
 use schnorrkel::derive::{ChainCode, Derivation, CHAIN_CODE_LENGTH};
 use schnorrkel::vrf::{VRFInOut, VRFPreOut, VRFProof, VRFProofBatchable, VRFSigningTranscript};
-use schnorrkel::{ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, SignatureError};
+use schnorrkel::{ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, Signature, SignatureError};
 use std::string::String;
 
 use merlin_jni::TranscriptData;
@@ -48,6 +48,21 @@ fn sign(message: Vec<u8>, sk: Vec<u8>, pubkey: Vec<u8>) -> Result<Vec<u8>, Strin
 }
 
 fn verify(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, String> {
+    let signature = Signature::from_bytes(signature).map_err(|e| e.to_string())?;
+    let result = PublicKey::from_bytes(public)
+        .map_err(|e| e.to_string())?
+        .verify_simple(SIGNING_CTX, message, &signature)
+        .map(|_| true);
+    match result {
+        Ok(value) => Ok(value),
+        Err(err) => match err {
+            SignatureError::EquationFalse => Ok(false),
+            _ => Err(err.to_string()),
+        },
+    }
+}
+
+fn verifyDeprecated(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, String> {
     let result = PublicKey::from_bytes(public)
         .map_err(|e| e.to_string())?
         .verify_simple_preaudit_deprecated(SIGNING_CTX, message, signature)
@@ -153,6 +168,36 @@ pub extern "system" fn Java_io_emeraldpay_polkaj_schnorrkel_SchnorrkelNative_ver
         .expect("Signature is not provided");
 
     let output = match verify(signature.as_slice(), message.as_slice(), pubkey.as_slice()) {
+        Ok(valid) => valid as jboolean,
+        Err(msg) => {
+            let none = false as jboolean;
+            env.throw_new("io/emeraldpay/polkaj/schnorrkel/SchnorrkelException", msg)
+                .unwrap();
+            none
+        }
+    };
+    output
+}
+
+#[no_mangle]
+pub extern "system" fn Java_io_emeraldpay_polkaj_schnorrkel_SchnorrkelNative_verifyDeprecated(
+    env: JNIEnv,
+    _class: JClass,
+    signature: jbyteArray,
+    message: jbyteArray,
+    pubkey: jbyteArray,
+) -> jboolean {
+    let message = env
+        .convert_byte_array(message)
+        .expect("Message is not provided");
+    let pubkey = env
+        .convert_byte_array(pubkey)
+        .expect("Public Key is not provided");
+    let signature = env
+        .convert_byte_array(signature)
+        .expect("Signature is not provided");
+
+    let output = match verifyDeprecated(signature.as_slice(), message.as_slice(), pubkey.as_slice()) {
         Ok(valid) => valid as jboolean,
         Err(msg) => {
             let none = false as jboolean;
