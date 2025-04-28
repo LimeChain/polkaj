@@ -50,10 +50,9 @@ fn sign(message: Vec<u8>, sk: Vec<u8>, pubkey: Vec<u8>) -> Result<Vec<u8>, Strin
 }
 
 fn verify(signature: &[u8], message: &[u8], public: &[u8]) -> Result<bool, String> {
-    let signature = Signature::from_bytes(signature).map_err(|e| e.to_string())?;
     let result = PublicKey::from_bytes(public)
         .map_err(|e| e.to_string())?
-        .verify_simple(SIGNING_CTX, message, &signature)
+        .verify_simple_preaudit_deprecated(SIGNING_CTX, message, signature)
         .map(|_| true);
     match result {
         Ok(value) => Ok(value),
