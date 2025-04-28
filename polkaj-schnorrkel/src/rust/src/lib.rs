@@ -18,9 +18,7 @@ use robusta_jni::jni::JNIEnv;
 use schnorrkel::context::SigningTranscript;
 use schnorrkel::derive::{ChainCode, Derivation, CHAIN_CODE_LENGTH};
 use schnorrkel::vrf::{VRFInOut, VRFPreOut, VRFProof, VRFProofBatchable, VRFSigningTranscript};
-use schnorrkel::{
-    ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, Signature, SignatureError,
-};
+use schnorrkel::{ExpansionMode, Keypair, MiniSecretKey, PublicKey, SecretKey, SignatureError};
 use std::string::String;
 
 use merlin_jni::TranscriptData;
