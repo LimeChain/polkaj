@@ -77,6 +77,20 @@ public abstract class Schnorrkel {
     public abstract boolean verify(byte[] signature, byte[] message, Schnorrkel.PublicKey publicKey) throws SchnorrkelException;
 
     /**
+     * VerifyDeprecated verifies that the public key signed the given message.
+     * Deprecated: this is used by ext_crypto_sr25519_verify_version_1 only and should not be used anywhere else.
+     * This method does not check that the signature is in fact a schnorrkel signature, and does not
+     * distinguish between sr25519 and ed25519 signatures.
+     *
+     * @param signature signature
+     * @param message signed message
+     * @param publicKey public key of the signer
+     * @return true if signature is correct
+     * @throws SchnorrkelException when signature or public key are invalid
+     */
+    public abstract boolean verifyDeprecated(byte[] signature, byte[] message, Schnorrkel.PublicKey publicKey) throws SchnorrkelException;
+
+    /**
      * Generate a new Key Pair using default Secure Random source
      *
      * @return new Key Pair

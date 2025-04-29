@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 [dependencies]
 robusta_jni = "0.2"
 jni = "0.21.1"
-schnorrkel = "0.11.4"
+schnorrkel = { version = "0.11.4", features = ["preaudit_deprecated"] }
 hex = "0.4.2"
 rand = "0.8.5"
 merlin = "3.0"

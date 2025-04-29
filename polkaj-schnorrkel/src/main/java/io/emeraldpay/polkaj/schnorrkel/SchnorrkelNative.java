@@ -65,6 +65,8 @@ public class SchnorrkelNative extends Schnorrkel {
 
     private static native boolean verify(byte[] signature, byte[] message, byte[] publicKey);
 
+    private static native boolean verifyDeprecated(byte[] signature, byte[] message, byte[] publicKey);
+
     private static native byte[] deriveHard(byte[] secret, byte[] cc);
 
     private static native byte[] deriveSoft(byte[] secret, byte[] cc);
@@ -132,6 +134,11 @@ public class SchnorrkelNative extends Schnorrkel {
     @Override
     public boolean verify(byte[] signature, byte[] message, PublicKey publicKey) throws SchnorrkelException {
         return SchnorrkelNative.verify(signature, message, publicKey.getPublicKey());
+    }
+
+    @Override
+    public boolean verifyDeprecated(byte[] signature, byte[] message, PublicKey publicKey) throws SchnorrkelException {
+        return SchnorrkelNative.verifyDeprecated(signature, message, publicKey.getPublicKey());
     }
 
     @Override
